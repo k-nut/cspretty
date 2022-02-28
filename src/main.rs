@@ -93,12 +93,7 @@ fn main() {
 
 fn pretty_print(input: &str) -> String {
     let parts: Vec<_> = input.split(';').collect();
-    let rows: Vec<Row> = parts
-        .iter()
-        .map(|part| Row::from(part))
-        .filter(|row| row.is_some())
-        .map(|row| row.unwrap())
-        .collect();
+    let rows: Vec<Row> = parts.iter().flat_map(|part| Row::from(part)).collect();
     return rows
         .iter()
         .map(|row| row.to_colored_string())
