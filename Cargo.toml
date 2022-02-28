@@ -1,0 +1,12 @@
+[package]
+name = "csp-checker"
+version = "0.1.0"
+authors = ["Knut Hühne <knut@k-nut.eu>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# Install https://github.com/mackwic/colored
+
+[dependencies]
+colored = "2"
+regex = "1"
