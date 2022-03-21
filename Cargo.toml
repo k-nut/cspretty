@@ -1,5 +1,5 @@
 [package]
-name = "csp-checker"
+name = "cspretty"
 version = "0.1.0"
 authors = ["Knut Hühne <knut@k-nut.eu>"]
 edition = "2018"
