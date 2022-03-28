@@ -1,6 +1,6 @@
 [package]
 name = "cspretty"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Knut Hühne <knut@k-nut.eu>"]
 edition = "2018"
 description = "A simple Content Security Policy pretty printer and syntax highlighter"
