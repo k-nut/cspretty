@@ -54,7 +54,7 @@ impl Value {
         match &self.value_type {
             ValueType::Error => self.text.black().on_red().to_string(),
             ValueType::UnSafe => self.text.red().to_string(),
-            ValueType::Plain => self.text.black().to_string(),
+            ValueType::Plain => self.text.normal().to_string(),
             ValueType::Safe => self.text.green().to_string(),
         }
     }
