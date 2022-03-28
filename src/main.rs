@@ -87,7 +87,7 @@ impl Row {
 fn main() {
     let input = io::stdin();
     for line in input.lock().lines() {
-        println!("{}", haupt(&line.unwrap()));
+        println!("{}", handle_line(&line.unwrap()));
     }
 }
 
@@ -101,7 +101,7 @@ fn pretty_print(input: &str) -> String {
         .join(";\n");
 }
 
-fn haupt(input: &str) -> String {
+fn handle_line(input: &str) -> String {
     let normalised_input = input.to_lowercase();
     let values = normalised_input.split("content-security-policy:").nth(1);
     match values {
@@ -112,7 +112,7 @@ fn haupt(input: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::{haupt, pretty_print, Value, ValueType};
+    use crate::{handle_line, pretty_print, Value, ValueType};
 
     #[test]
     fn setup() {
@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn it_extracts_from_header() {
         let input = String::from("Content-Security-Policy: default-src 'self'");
-        let result = haupt(&input);
+        let result = handle_line(&input);
         let expected_value = "default-src 'self'";
         assert_eq!(result, expected_value);
     }
@@ -150,7 +150,7 @@ mod tests {
     fn it_extracts_from_header_example_2() {
         let input =
             String::from("Content-Security-Policy: default-src 'self' trusted.com *.trusted.com");
-        let result = haupt(&input);
+        let result = handle_line(&input);
         let expected_value = "default-src 'self' trusted.com *.trusted.com";
         assert_eq!(result, expected_value);
     }
@@ -158,7 +158,7 @@ mod tests {
     #[test]
     fn it_extracts_from_header_example_3() {
         let input = String::from("Content-Security-Policy: default-src 'self'; img-src *; media-src media1.com media2.com; script-src userscripts.example.com");
-        let result = haupt(&input);
+        let result = handle_line(&input);
         let expected_value = "default-src 'self';\nimg-src *;\nmedia-src media1.com media2.com;\nscript-src userscripts.example.com";
         assert_eq!(result, expected_value);
     }
