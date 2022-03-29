@@ -1,6 +1,6 @@
 [package]
 name = "cspretty"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Knut Hühne <knut@k-nut.eu>"]
 edition = "2018"
 description = "A simple Content Security Policy pretty printer and syntax highlighter"
@@ -12,5 +12,6 @@ readme = "README.md"
 # Install https://github.com/mackwic/colored
 
 [dependencies]
+clap = { version = "3.1.6", features = ["derive"] }
 colored = "2"
 regex = "1"
