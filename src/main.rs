@@ -1,3 +1,4 @@
+use clap::Parser;
 use colored::Colorize;
 use regex::Regex;
 use std::io::{self, BufRead};
@@ -71,42 +72,54 @@ impl Row {
         Some(Row { key, values })
     }
 
-    fn to_colored_string(&self) -> String {
+    fn to_colored_string(&self, separator: &str) -> String {
         format!(
-            "{} {}",
+            "{}{}{}",
             self.key.blue(),
+            separator,
             self.values
                 .iter()
                 .map(|value| value.pretty())
                 .collect::<Vec<_>>()
-                .join(" ")
+                .join(separator)
         )
     }
 }
 
+#[derive(Parser, Debug)]
+#[clap(version, about, long_about = None)]
+struct Args {
+    /// Show one source per line
+    #[clap(short, long)]
+    multiline: bool,
+}
+
 fn main() {
+    let args = Args::parse();
+
     let input = io::stdin();
     for line in input.lock().lines() {
-        println!("{}", handle_line(&line.unwrap()));
+        println!("{}", handle_line(&line.unwrap(), args.multiline));
     }
 }
 
-fn pretty_print(input: &str) -> String {
+fn pretty_print(input: &str, multi_line: bool) -> String {
+    let separator = if multi_line { "\n\t" } else { " " };
     let parts: Vec<_> = input.split(';').collect();
     let rows: Vec<Row> = parts.iter().flat_map(|part| Row::from(part)).collect();
     return rows
         .iter()
-        .map(|row| row.to_colored_string())
+        .map(|row| row.to_colored_string(separator))
         .collect::<Vec<_>>()
         .join(";\n");
 }
 
-fn handle_line(input: &str) -> String {
+fn handle_line(input: &str, multi_line: bool) -> String {
     let normalised_input = input.to_lowercase();
     let values = normalised_input.split("content-security-policy:").nth(1);
     match values {
-        None => pretty_print(input),
-        Some(value) => pretty_print(value),
+        None => pretty_print(input, multi_line),
+        Some(value) => pretty_print(value, multi_line),
     }
 }
 
@@ -125,14 +138,14 @@ mod tests {
 
     #[test]
     fn it_returns_empty_for_empty_string() {
-        let result = pretty_print(&String::from(""));
+        let result = pretty_print(&String::from(""), false);
         assert_eq!(result, "");
     }
 
     #[test]
     fn it_adds_newlines() {
         let input = String::from("default-src 'self'; img-src https://*; child-src 'none';");
-        let result = pretty_print(&input);
+        let result = pretty_print(&input, false);
         let expected_value = "default-src 'self';\nimg-src https://*;\nchild-src 'none'";
         assert_eq!(result, expected_value);
     }
@@ -140,8 +153,9 @@ mod tests {
     // Examples taken from MDN: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
     #[test]
     fn it_extracts_from_header() {
+        colored::control::set_override(false);
         let input = String::from("Content-Security-Policy: default-src 'self'");
-        let result = handle_line(&input);
+        let result = handle_line(&input, false);
         let expected_value = "default-src 'self'";
         assert_eq!(result, expected_value);
     }
@@ -150,7 +164,7 @@ mod tests {
     fn it_extracts_from_header_example_2() {
         let input =
             String::from("Content-Security-Policy: default-src 'self' trusted.com *.trusted.com");
-        let result = handle_line(&input);
+        let result = handle_line(&input, false);
         let expected_value = "default-src 'self' trusted.com *.trusted.com";
         assert_eq!(result, expected_value);
     }
@@ -158,8 +172,16 @@ mod tests {
     #[test]
     fn it_extracts_from_header_example_3() {
         let input = String::from("Content-Security-Policy: default-src 'self'; img-src *; media-src media1.com media2.com; script-src userscripts.example.com");
-        let result = handle_line(&input);
+        let result = handle_line(&input, false);
         let expected_value = "default-src 'self';\nimg-src *;\nmedia-src media1.com media2.com;\nscript-src userscripts.example.com";
+        assert_eq!(result, expected_value);
+    }
+
+    #[test]
+    fn it_extracts_from_header_example_3_with_multiline() {
+        let input = String::from("Content-Security-Policy: default-src 'self'; img-src *; media-src media1.com media2.com; script-src userscripts.example.com");
+        let result = handle_line(&input, true);
+        let expected_value = "default-src\n\t'self';\nimg-src\n\t*;\nmedia-src\n\tmedia1.com\n\tmedia2.com;\nscript-src\n\tuserscripts.example.com";
         assert_eq!(result, expected_value);
     }
 
