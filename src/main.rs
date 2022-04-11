@@ -2,6 +2,8 @@ use clap::Parser;
 use colored::Colorize;
 use regex::Regex;
 use std::io::{self, BufRead};
+use std::iter::FlatMap;
+use std::str::Split;
 
 struct Row {
     key: String,
@@ -105,13 +107,11 @@ fn main() {
 
 fn pretty_print(input: &str, multi_line: bool) -> String {
     let separator = if multi_line { "\n\t" } else { " " };
-    let parts: Vec<_> = input.split(';').collect();
-    let rows: Vec<Row> = parts.iter().flat_map(|part| Row::from(part)).collect();
-    return rows
-        .iter()
-        .map(|row| row.to_colored_string(separator))
+    let parts: Split<_> = input.split(';');
+    let rows: FlatMap<_, _, _> = parts.flat_map(Row::from);
+    rows.map(|row| row.to_colored_string(separator))
         .collect::<Vec<_>>()
-        .join(";\n");
+        .join(";\n")
 }
 
 fn handle_line(input: &str, multi_line: bool) -> String {
